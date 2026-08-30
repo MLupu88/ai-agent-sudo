@@ -1,0 +1,39 @@
+{
+  "name": "ai-agent-sudo",
+  "version": "0.0.0",
+  "description": "Tiny provider-neutral authorization layer for AI agents: allow / deny / require_approval.",
+  "type": "module",
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "default": "./dist/index.js"
+    }
+  },
+  "files": [
+    "dist",
+    "README.md"
+  ],
+  "engines": {
+    "node": ">=22"
+  },
+  "sideEffects": false,
+  "scripts": {
+    "typecheck": "tsc -p tsconfig.json --noEmit",
+    "build": "tsc -p tsconfig.build.json",
+    "test": "node --test"
+  },
+  "keywords": [
+    "authorization",
+    "policy",
+    "ai-agent",
+    "agent",
+    "tool-use",
+    "guardrails"
+  ],
+  "devDependencies": {
+    "@types/node": "^22.10.2",
+    "typescript": "^5.9.2"
+  }
+}
