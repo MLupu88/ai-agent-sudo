@@ -82,4 +82,3 @@ when publication is explicitly authorized.
 - GitHub Actions CI (Node 22.x + 24.x).
 
 <!-- Version comparison / tag links are added when v0.1.0 is tagged and released. -->
-

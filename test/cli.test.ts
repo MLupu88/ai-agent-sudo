@@ -4,11 +4,14 @@ import { mkdtempSync, rmSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { after, test } from "node:test";
+import { fileURLToPath } from "node:url";
 
 import { check } from "../src/index.ts";
 import type { PolicySet } from "../src/index.ts";
 
-const CLI = new URL("../src/cli.ts", import.meta.url).pathname;
+// fileURLToPath (not URL#pathname) so a checkout path containing a space, %, or #
+// is decoded correctly before it is handed to spawn.
+const CLI = fileURLToPath(new URL("../src/cli.ts", import.meta.url));
 const POLICY = "examples/policy-files/crm-policy.json";
 const REQ = (name: string) => `examples/policy-files/requests/${name}.json`;
 
@@ -185,3 +188,62 @@ test("unknown command exits 2", () => {
   assert.equal(status, 2);
   assert.match(stderr, /unknown command/);
 });
+
+// 12. A `check` result larger than the OS pipe buffer (~64 KiB) must survive
+// intact when stdout is a real shell pipe. Regression: the CLI used to call
+// process.exit(), which could terminate before a large stdout write had
+// drained — emitting a truncated, unparseable AuthorizationResult while still
+// reporting exit 0.
+const PIPE_REPRO =
+  process.platform !== "win32" &&
+  spawnSync("bash", ["-c", "true"]).status === 0;
+
+test(
+  "check: a >64 KiB result is not truncated when stdout is a shell pipe",
+  { skip: PIPE_REPRO ? false : "needs bash and a POSIX pipe" },
+  () => {
+    const bigReason = "R".repeat(96 * 1024); // ~96 KiB, well past the pipe buffer
+    const policy: PolicySet = {
+      rules: [
+        { id: "big", match: { action: "go" }, decision: "deny", reason: bigReason },
+      ],
+      defaultDecision: "deny",
+      defaultReason: "unused",
+    };
+    const request = { actor: { id: "a" }, action: { name: "go" } };
+    const policyPath = fixture("big-policy.json", JSON.stringify(policy));
+    const requestPath = fixture("big-request.json", JSON.stringify(request));
+
+    // Run the real CLI with stdout going through an actual shell pipe (`| cat`),
+    // not a Node-managed capture — the truncation only shows through an OS pipe
+    // whose reader is not the Node parent. `pipefail` surfaces the CLI's own
+    // exit status as the pipeline status.
+    const q = (s: string) => `'${s.replace(/'/g, `'\\''`)}'`;
+    const piped = spawnSync(
+      "bash",
+      [
+        "-c",
+        `set -o pipefail; ${q(process.execPath)} ${q(CLI)} check ${q(policyPath)} ${q(requestPath)} | cat`,
+      ],
+      { encoding: "utf8", maxBuffer: 64 * 1024 * 1024 },
+    );
+
+    assert.equal(piped.status, 0, piped.stderr);
+    assert.ok(
+      Buffer.byteLength(piped.stdout, "utf8") > 65536,
+      `stdout was ${Buffer.byteLength(piped.stdout, "utf8")} bytes — truncated at the pipe buffer`,
+    );
+
+    const result = JSON.parse(piped.stdout) as {
+      decision: string;
+      reason: string;
+      ruleId: string | null;
+      source: string;
+    };
+    assert.equal(result.decision, "deny");
+    assert.equal(result.ruleId, "big");
+    assert.equal(result.source, "rule");
+    assert.equal(result.reason, bigReason); // the entire reason round-tripped
+    assert.deepEqual(JSON.parse(piped.stdout), check(policy, request));
+  },
+);

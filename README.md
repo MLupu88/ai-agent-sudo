@@ -478,6 +478,10 @@ deliberately out of scope — see
 The contents planned for v0.1.0 are listed in
 [`CHANGELOG.md`](https://github.com/MLupu88/ai-agent-sudo/blob/main/CHANGELOG.md).
 
+## Author
+
+Created by Mihail Lupu.
+
 ## License
 
 [MIT](https://github.com/MLupu88/ai-agent-sudo/blob/main/LICENSE) © 2026 AI Agent Sudo contributors
