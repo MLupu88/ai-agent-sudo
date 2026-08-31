@@ -143,6 +143,43 @@ A runnable version covering all three outcomes is in
 [`examples/protect-tool-call.ts`](https://github.com/MLupu88/ai-agent-sudo/blob/main/examples/protect-tool-call.ts)
 — clone the repo and run `npm run example`.
 
+## Same policy, different runtimes
+
+Authorization does not belong to any one agent runtime. Two different agent
+systems can map their own attempted tool calls into the same Agent Sudo
+`AuthorizationRequest` and evaluate them against the **same `PolicySet`**.
+
+```
+OpenAI-style call ─┐
+                   ├─ runtime mapper → AuthorizationRequest → Agent Sudo
+MCP-style call ────┘                          │
+                                              ↓
+                              ALLOW / DENY / REQUIRE_APPROVAL
+```
+
+- The runtime-specific code only **translates** its own envelope — function
+  name plus a JSON-string `arguments` for the OpenAI shape; a `tools/call`
+  JSON-RPC message with a structured `arguments` object for the MCP shape —
+  into `{ actor, action, resource, context }`.
+- The `PolicySet` is written once, shared unchanged, and owned by Agent Sudo —
+  not by either runtime. It is never duplicated or re-translated per runtime.
+- Agent Sudo itself never learns what "OpenAI" or "MCP" is. `src/` has no
+  provider concepts.
+
+[`examples/cross-runtime/`](https://github.com/MLupu88/ai-agent-sudo/tree/main/examples/cross-runtime)
+is a runnable proof: the same four semantic actions (read a customer, delete a
+customer, send external email in production, an unmapped action) arrive from
+both runtime shapes and are asserted to produce the **same `decision`,
+`ruleId`, `source` and `reason`**. It exits non-zero on any mismatch.
+
+```bash
+npm run example:cross-runtime
+```
+
+`openai-style.ts` and `mcp-style.ts` are **integration-shape examples** showing
+how a runtime maps into Agent Sudo. They are not official or certified provider
+adapters and pull in no runtime SDKs.
+
 ## Request model
 
 ```ts
@@ -228,7 +265,8 @@ declared order.
 npm test        # node --test
 npm run typecheck
 npm run build   # emits dist/
-npm run example # runnable integration example
+npm run example                # runnable integration example
+npm run example:cross-runtime  # same policy evaluated from two runtime shapes
 ```
 
 Requires Node >= 22. Building and running the tests / example from source uses
