@@ -152,4 +152,8 @@ function main(argv: string[]): number {
   }
 }
 
-process.exit(main(process.argv.slice(2)));
+// Set the exit code rather than calling process.exit(): process.exit() can
+// terminate the process before a large piped stdout write has drained,
+// truncating the AuthorizationResult while still reporting success. Setting
+// process.exitCode lets Node flush stdout and exit once the event loop empties.
+process.exitCode = main(process.argv.slice(2));

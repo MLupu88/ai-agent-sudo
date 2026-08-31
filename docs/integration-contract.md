@@ -120,3 +120,10 @@ flowchart LR
 
 Keep them separate. Agent Sudo has no "conformance engine" and needs none — a
 conformance test is just `assert.deepEqual` on the output of your mapper.
+
+---
+
+See also: [architecture.md](./architecture.md) ·
+[authorization-model.md](./authorization-model.md) ·
+[integrations.md](./integrations.md) · [testing.md](./testing.md) ·
+[security.md](./security.md) · [documentation index](./README.md)
