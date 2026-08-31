@@ -1,0 +1,6 @@
+{
+  "actor": { "id": "crm-agent" },
+  "action": { "name": "read_customer" },
+  "resource": { "type": "customer", "id": "cus_100" },
+  "context": { "env": "production" }
+}

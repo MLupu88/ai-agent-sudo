@@ -1,0 +1,34 @@
+{
+  "rules": [
+    {
+      "id": "deny-customer-deletion",
+      "match": {
+        "action": "delete_customer"
+      },
+      "decision": "deny",
+      "reason": "Customer deletion is not permitted."
+    },
+    {
+      "id": "approve-prod-external-email",
+      "match": {
+        "action": "send_email",
+        "context": {
+          "env": "production",
+          "recipient_scope": "external"
+        }
+      },
+      "decision": "require_approval",
+      "reason": "External production email requires approval."
+    },
+    {
+      "id": "allow-crm-read",
+      "match": {
+        "action": "read_customer"
+      },
+      "decision": "allow",
+      "reason": "CRM reads are permitted."
+    }
+  ],
+  "defaultDecision": "deny",
+  "defaultReason": "No policy rule authorized this action."
+}

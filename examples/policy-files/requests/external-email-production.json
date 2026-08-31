@@ -1,0 +1,6 @@
+{
+  "actor": { "id": "crm-agent" },
+  "action": { "name": "send_email" },
+  "resource": { "type": "email", "id": "msg_9" },
+  "context": { "env": "production", "recipient_scope": "external" }
+}
