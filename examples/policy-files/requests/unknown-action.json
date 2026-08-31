@@ -1,0 +1,5 @@
+{
+  "actor": { "id": "crm-agent" },
+  "action": { "name": "export_all_customers" },
+  "context": { "env": "production" }
+}

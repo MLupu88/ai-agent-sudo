@@ -57,7 +57,8 @@ npm install ai-agent-sudo
 
 Zero runtime dependencies. Requires Node >= 22. TypeScript consumers need
 TypeScript >= 5.7 (the shipped declarations use modern relative-import
-resolution).
+resolution). Installing the package also provides an `agent-sudo` command (see
+[JSON policies & the CLI](#json-policies--the-cli)).
 
 ## Usage
 
@@ -179,6 +180,73 @@ npm run example:cross-runtime
 `openai-style.ts` and `mcp-style.ts` are **integration-shape examples** showing
 how a runtime maps into Agent Sudo. They are not official or certified provider
 adapters and pull in no runtime SDKs.
+
+Different runtimes name the same operation differently (`crm_lookup_customer` vs
+`crm.get-customer`). Agent Sudo deliberately does **not** normalize provider
+terminology in the core — that mapping is per-application adapter code you write
+and test. See
+[`docs/integration-contract.md`](https://github.com/MLupu88/ai-agent-sudo/blob/main/docs/integration-contract.md)
+for who owns the canonical vocabulary and how to write mapper conformance tests.
+
+## JSON policies & the CLI
+
+A policy can live in a plain JSON file using the exact `PolicySet` structure
+(same fields, same semantics — declared rule order, first match wins, explicit
+default required):
+
+```jsonc
+// crm-policy.json
+{
+  "rules": [
+    { "id": "deny-customer-deletion",
+      "match": { "action": "delete_customer" },
+      "decision": "deny", "reason": "Customer deletion is not permitted." },
+    { "id": "approve-prod-external-email",
+      "match": { "action": "send_email",
+                 "context": { "env": "production", "recipient_scope": "external" } },
+      "decision": "require_approval", "reason": "External production email requires approval." },
+    { "id": "allow-crm-read",
+      "match": { "action": "read_customer" },
+      "decision": "allow", "reason": "CRM reads are permitted." }
+  ],
+  "defaultDecision": "deny",
+  "defaultReason": "No policy rule authorized this action."
+}
+```
+
+The package ships an `agent-sudo` binary that runs the **same** validation and
+engine as the library:
+
+```bash
+agent-sudo validate crm-policy.json
+# crm-policy.json: valid — 3 rule(s), default "deny"
+
+agent-sudo check crm-policy.json request.json
+# { "decision": "deny", "reason": "...", "ruleId": "deny-customer-deletion", "source": "rule" }
+
+agent-sudo --help
+```
+
+`check` writes the `AuthorizationResult` as JSON to stdout and **exits 0 for
+every decision** — `allow`, `deny` and `require_approval` are all successful
+evaluations. It exits non-zero only on an unreadable file, malformed JSON, or an
+invalid policy / request. Errors go to stderr.
+
+| Exit code | Meaning |
+| --- | --- |
+| `0` | `validate`: policy is valid · `check`: evaluation completed (any decision) |
+| `1` | unreadable file, malformed JSON, or invalid policy / request |
+| `2` | usage error (unknown command, wrong argument count) |
+
+Runnable example files are in
+[`examples/policy-files/`](https://github.com/MLupu88/ai-agent-sudo/tree/main/examples/policy-files)
+(`crm-policy.json` plus four requests covering allow / deny / require_approval /
+default-deny):
+
+```bash
+agent-sudo check examples/policy-files/crm-policy.json \
+  examples/policy-files/requests/delete-customer.json
+```
 
 ## Request model
 
