@@ -55,6 +55,10 @@ no server, no telemetry. Just a library and a small contract.
 npm install ai-agent-sudo
 ```
 
+Zero runtime dependencies. Requires Node >= 22. TypeScript consumers need
+TypeScript >= 5.7 (the shipped declarations use modern relative-import
+resolution).
+
 ## Usage
 
 ```ts
@@ -105,6 +109,39 @@ result.source;   // "rule"                ("default" when nothing matched)
 ```
 
 A one-shot form is also exported: `check(policy, request)`.
+
+## Integrating in front of a tool call
+
+Agent Sudo sits between "the agent wants to do X" and "X happens". It returns a
+decision; **the caller** acts on it. Agent Sudo never runs the tool.
+
+```ts
+import { createSudo } from "ai-agent-sudo";
+import type { AuthorizationRequest } from "ai-agent-sudo";
+
+const sudo = createSudo(policy);
+
+function guardedCall<T>(request: AuthorizationRequest, runTool: () => T) {
+  const { decision, reason, ruleId } = sudo.check(request);
+  switch (decision) {
+    case "allow":
+      return runTool(); // the caller invokes the tool
+    case "deny":
+      throw new Error(`blocked by ${ruleId ?? "default"}: ${reason}`);
+    case "require_approval":
+      return { status: "pending_approval" as const, reason, ruleId };
+  }
+}
+
+guardedCall(
+  { actor: { id: "sales-agent" }, action: { name: "send_email" }, context: { env: "production" } },
+  () => emailClient.send(/* ... */),
+);
+```
+
+A runnable version covering all three outcomes is in
+[`examples/protect-tool-call.ts`](https://github.com/MLupu88/ai-agent-sudo/blob/main/examples/protect-tool-call.ts)
+— clone the repo and run `npm run example`.
 
 ## Request model
 
@@ -191,7 +228,11 @@ declared order.
 npm test        # node --test
 npm run typecheck
 npm run build   # emits dist/
+npm run example # runnable integration example
 ```
+
+Requires Node >= 22. Building and running the tests / example from source uses
+Node's native TypeScript execution.
 
 ## Status
 

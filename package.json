@@ -1,6 +1,6 @@
 {
   "name": "ai-agent-sudo",
-  "version": "0.0.0",
+  "version": "0.1.0",
   "description": "Tiny provider-neutral authorization layer for AI agents: allow / deny / require_approval.",
   "type": "module",
   "main": "./dist/index.js",
@@ -22,16 +22,30 @@
   "scripts": {
     "typecheck": "tsc -p tsconfig.json --noEmit",
     "build": "tsc -p tsconfig.build.json",
-    "test": "node --test"
+    "prepare": "npm run build",
+    "test": "node --test",
+    "example": "node examples/protect-tool-call.ts"
   },
   "keywords": [
     "authorization",
     "policy",
+    "access-control",
+    "permissions",
     "ai-agent",
     "agent",
     "tool-use",
-    "guardrails"
+    "tool-calling",
+    "guardrails",
+    "llm"
   ],
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/MLupu88/ai-agent-sudo.git"
+  },
+  "homepage": "https://github.com/MLupu88/ai-agent-sudo#readme",
+  "bugs": {
+    "url": "https://github.com/MLupu88/ai-agent-sudo/issues"
+  },
   "devDependencies": {
     "@types/node": "^22.10.2",
     "typescript": "^5.9.2"
