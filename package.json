@@ -24,7 +24,8 @@
     "build": "tsc -p tsconfig.build.json",
     "prepare": "npm run build",
     "test": "node --test",
-    "example": "node examples/protect-tool-call.ts"
+    "example": "node examples/protect-tool-call.ts",
+    "example:cross-runtime": "node examples/cross-runtime/cross-runtime-proof.ts"
   },
   "keywords": [
     "authorization",
