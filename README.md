@@ -76,9 +76,6 @@ contract, verified in isolation.
 npm install ai-agent-sudo
 ```
 
-> **Pre-release:** v0.1.0 is not yet published to npm. The command above is how
-> it will be installed once the release is published.
-
 - **Node** ≥ 22.
 - **Zero runtime dependencies.**
 - **TypeScript** consumers: TypeScript ≥ 5.7 with `moduleResolution` set to
@@ -467,9 +464,7 @@ TypeScript execution. Contributions: see
 
 ## Status
 
-**v0.1.0 — release candidate.** This is the version being prepared for the first
-public release. It is **not yet published to npm**, and no `v0.1.0` git tag or
-GitHub release exists yet. The API surface (`check`, `createSudo`,
+**v0.1.0** — initial public release. The API surface (`check`, `createSudo`,
 `InvalidPolicySetError`, `InvalidRequestError`, and the exported types) is
 intentionally small and considered stable for the 0.x line. Changes that would
 expand policy semantics or add provider-specific knowledge to the core are

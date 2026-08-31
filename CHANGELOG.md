@@ -8,11 +8,9 @@ project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 _Nothing yet._
 
-## 0.1.0 — unreleased
+## 0.1.0 — 2026-08-31
 
-Contents prepared for the initial v0.1.0 release. **Not yet published:** the
-release date, the `v0.1.0` git tag, and the GitHub release are finalized only
-when publication is explicitly authorized.
+Initial public release.
 
 ### Authorization core
 
@@ -80,5 +78,3 @@ when publication is explicitly authorized.
   `docs/security.md`, `docs/integrations.md`, `docs/testing.md`.
 - `SECURITY.md`, `CONTRIBUTING.md`, MIT `LICENSE`.
 - GitHub Actions CI (Node 22.x + 24.x).
-
-<!-- Version comparison / tag links are added when v0.1.0 is tagged and released. -->
