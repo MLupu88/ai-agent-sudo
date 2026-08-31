@@ -1,7 +1,8 @@
 {
   "name": "ai-agent-sudo",
   "version": "0.1.0",
-  "description": "Tiny provider-neutral authorization layer for AI agents: allow / deny / require_approval.",
+  "description": "Tiny provider-neutral authorization checkpoint for AI-agent actions: allow / deny / require_approval.",
+  "license": "MIT",
   "type": "module",
   "main": "./dist/index.js",
   "types": "./dist/index.d.ts",
@@ -16,7 +17,9 @@
   },
   "files": [
     "dist",
-    "README.md"
+    "README.md",
+    "LICENSE",
+    "CHANGELOG.md"
   ],
   "engines": {
     "node": ">=22"
@@ -28,7 +31,9 @@
     "prepare": "npm run build",
     "test": "node --test",
     "example": "node examples/protect-tool-call.ts",
-    "example:cross-runtime": "node examples/cross-runtime/cross-runtime-proof.ts"
+    "example:cross-runtime": "node examples/cross-runtime/cross-runtime-proof.ts",
+    "release:check": "npm test && npm run typecheck && npm run build && npm run example && npm run example:cross-runtime && npm pack --dry-run",
+    "prepublishOnly": "npm run release:check"
   },
   "keywords": [
     "authorization",
